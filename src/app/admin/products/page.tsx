@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -83,7 +82,7 @@ async function ProductTable() {
               ) : (
                 <>
                   <span className="sr-only">UnAvialable for Purchase</span>
-                  <XCircle />
+                  <XCircle className="stroke-destructive" />
                 </>
               )}
             </TableCell>
@@ -100,8 +99,8 @@ async function ProductTable() {
                 <DropdownMenuContent>
                   <DropdownMenuItem asChild>
                     <a
-                      aria-label="download"
                       download
+                      aria-label="download"
                       href={`/admin/products/${product.id}/download`}
                     >
                       Download
