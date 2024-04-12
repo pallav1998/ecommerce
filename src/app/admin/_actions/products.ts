@@ -52,6 +52,54 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   redirect("/admin/products");
 }
 
+const editSchems = addSchema.extend({
+  file: FileSchema.optional(),
+  image: ImageSchema.optional(),
+});
+export async function updateProduct(
+  id: string,
+  prevState: unknown,
+  formData: FormData
+) {
+  const result = editSchems.safeParse(Object.fromEntries(formData.entries()));
+
+  if (result.success === false) {
+    return result.error.formErrors.fieldErrors;
+  }
+
+  const data = result.data;
+  const product = await prisma.product.findUnique({ where: { id } });
+
+  if (product !== null) return notFound();
+  let filePath = product?.filePath;
+  if (data.file !== null && (data?.file?.size as number) > 0) {
+    fs.unlink(product?.filePath as string);
+
+    filePath = `products/${crypto.randomUUID()}-${data.file.name}`;
+    await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
+  }
+
+  await fs.mkdir("public/products", { recursive: true });
+  const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+  await fs.writeFile(
+    `public${imagePath}`,
+    Buffer.from(await data.image.arrayBuffer())
+  );
+
+  await prisma.product.create({
+    data: {
+      isAvailableForPurchase: false,
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      filePath,
+      imagePath,
+    },
+  });
+
+  redirect("/admin/products");
+}
+
 export async function toggleProductAvilability(
   id: string,
   isAvailableForPurchase: boolean
