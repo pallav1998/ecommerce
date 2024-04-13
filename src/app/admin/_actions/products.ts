@@ -52,7 +52,7 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   redirect("/admin/products");
 }
 
-const editSchems = addSchema.extend({
+const editSchema = addSchema.extend({
   file: FileSchema.optional(),
   image: ImageSchema.optional(),
 });
@@ -61,8 +61,7 @@ export async function updateProduct(
   prevState: unknown,
   formData: FormData
 ) {
-  const result = editSchems.safeParse(Object.fromEntries(formData.entries()));
-
+  const result = editSchema.safeParse(Object.fromEntries(formData.entries()));
   if (result.success === false) {
     return result.error.formErrors.fieldErrors;
   }
@@ -70,25 +69,28 @@ export async function updateProduct(
   const data = result.data;
   const product = await prisma.product.findUnique({ where: { id } });
 
-  if (product !== null) return notFound();
-  let filePath = product?.filePath;
-  if (data.file !== null && (data?.file?.size as number) > 0) {
-    fs.unlink(product?.filePath as string);
+  if (product == null) return notFound();
 
+  let filePath = product.filePath;
+  if (data.file != null && data.file.size > 0) {
+    await fs.unlink(product.filePath);
     filePath = `products/${crypto.randomUUID()}-${data.file.name}`;
     await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()));
   }
 
-  await fs.mkdir("public/products", { recursive: true });
-  const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
-  await fs.writeFile(
-    `public${imagePath}`,
-    Buffer.from(await data.image.arrayBuffer())
-  );
+  let imagePath = product.imagePath;
+  if (data.image != null && data.image.size > 0) {
+    await fs.unlink(`public${product.imagePath}`);
+    imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`;
+    await fs.writeFile(
+      `public${imagePath}`,
+      Buffer.from(await data.image.arrayBuffer())
+    );
+  }
 
-  await prisma.product.create({
+  await prisma.product.update({
+    where: { id },
     data: {
-      isAvailableForPurchase: false,
       name: data.name,
       description: data.description,
       price: data.price,
@@ -96,6 +98,9 @@ export async function updateProduct(
       imagePath,
     },
   });
+
+  // revalidatePath("/");
+  // revalidatePath("/products");
 
   redirect("/admin/products");
 }
