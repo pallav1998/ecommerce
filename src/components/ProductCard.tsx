@@ -49,3 +49,29 @@ export default function ProductCard({
     </Card>
   );
 }
+
+export function ProductCardSkelaton() {
+  return (
+    <Card className="flex flex-col overflow-hidden animate-pulse">
+      <div className="w-full aspect-video bg-gray-300" />
+      <CardHeader>
+        <CardTitle>
+          <div className="w-3/4 h-6 rounded-full bg-gray-300" />
+        </CardTitle>
+        <CardDescription>
+          <div className="w-1/2 h-6 rounded-fullbg-gray-300" />
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-2">
+        <div className="w-full h-6 rounded-full bg-gray-300" />
+        <div className="w-full h-6 rounded-full bg-gray-300" />
+        <div className="w-3/4 h-6 rounded-full bg-gray-300" />
+      </CardContent>
+
+      <CardFooter>
+        <Button size="lg" className="w-full" disabled></Button>
+      </CardFooter>
+    </Card>
+  );
+}
