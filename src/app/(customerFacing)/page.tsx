@@ -5,24 +5,29 @@ import { Product } from "@prisma/client";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { cache } from "@/lib/cache";
 
-async function getMostPopularProduct() {
-  // await wait(2000);
-  return prisma.product.findMany({
-    where: { isAvailableForPurchase: true },
-    orderBy: { orders: { _count: "desc" } },
-    take: 6,
-  });
-}
+const getMostPopularProduct = cache(
+  () => {
+    // await wait(2000);
+    return prisma.product.findMany({
+      where: { isAvailableForPurchase: true },
+      orderBy: { orders: { _count: "desc" } },
+      take: 6,
+    });
+  },
+  ["/", "getMostPopularProduct"],
+  { revalidate: 60 * 60 * 24 }
+);
 
-async function getNewestProduct() {
+const getNewestProduct = cache(() => {
   // await wait(5000);
   return prisma.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
-}
+}, ["/", "getNewestProduct"]);
 
 // function wait(durations: number) {
 //   return new Promise((resolve) => setTimeout(resolve, durations));
