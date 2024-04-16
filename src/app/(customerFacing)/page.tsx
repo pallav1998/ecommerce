@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 async function getMostPopularProduct() {
+  // await wait(2000);
   return prisma.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { orders: { _count: "desc" } },
@@ -14,13 +15,18 @@ async function getMostPopularProduct() {
   });
 }
 
-function getNewestProduct() {
+async function getNewestProduct() {
+  // await wait(5000);
   return prisma.product.findMany({
     where: { isAvailableForPurchase: true },
     orderBy: { createdAt: "desc" },
     take: 6,
   });
 }
+
+// function wait(durations: number) {
+//   return new Promise((resolve) => setTimeout(resolve, durations));
+// }
 
 export default function HomePage() {
   return (
