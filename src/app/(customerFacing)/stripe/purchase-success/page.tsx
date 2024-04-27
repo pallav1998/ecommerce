@@ -8,25 +8,62 @@ import { notFound } from "next/navigation";
 import React from "react";
 import Stripe from "stripe";
 
+import { Resend } from "resend";
+import { NextResponse } from "next/server";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function SuccessPage({
   searchParams,
 }: {
   searchParams: { payment_intent: string };
 }) {
+  const email = "jain.pallav1998@gmail.com";
   const paymentIntent = await stripe.paymentIntents.retrieve(
     searchParams.payment_intent
   );
-  if (paymentIntent.metadata.productId === null) return notFound();
+  const productId = paymentIntent.metadata.productId;
+  if (productId === null) return notFound();
 
   const product = await prisma.product.findUnique({
-    where: { id: paymentIntent.metadata.productId },
+    where: { id: productId },
   });
   if (product === null) return notFound();
 
   const isSuccess = paymentIntent.status === "succeeded";
   console.log("paymentIntent", paymentIntent);
+
+  if (isSuccess) {
+    const pricePaid = paymentIntent.amount_received;
+    const userFields = {
+      email,
+      orders: { create: { productId, pricePaid } },
+    };
+
+    const {
+      orders: [order],
+    } = await prisma.user.upsert({
+      where: { email },
+      create: userFields,
+      update: userFields,
+      select: { orders: { orderBy: { createdAt: "desc" }, take: 1 } },
+    });
+
+    const downloadVerifacation = await prisma.downloadVerification.create({
+      data: { productId, expiresAt: new Date(Date.now() + 1000 * 60) },
+    });
+
+    await resend.emails.send({
+      from: `Support <${process.env.RESEND_SENDER_EMAIL}>`,
+      to: email,
+      subject: "Order Confirmation",
+      react: <h1>Order Confirmed</h1>,
+    });
+
+    // return new NextResponse("Order Confirmed", { status: 200 });
+  }
+
   return (
     <div className="max-w-5xl w-full mx-auto space-y-8">
       <h1 className="text-4xl font-bold">

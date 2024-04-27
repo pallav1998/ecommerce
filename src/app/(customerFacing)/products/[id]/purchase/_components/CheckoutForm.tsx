@@ -108,7 +108,7 @@ function StripeForm({
         if (error.type === "card_error" || error.type === "validation_error") {
           setErrorMessage(error.message);
         } else {
-          setErrorMessage("An unknown error occurred");
+          setErrorMessage("Please add the details of any Indian Card");
         }
       })
       .finally(() => setIsLoading(false));
