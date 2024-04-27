@@ -43,9 +43,7 @@ export function OrderInformation({
             <Text className="mb-0 text-gray-500 whitespace-nowrap text-nowrap mr-4">
               Price Paid
             </Text>
-            <Text className="mt-0 mr-4">
-              {formatCurrency(order.pricePaid)}
-            </Text>
+            <Text className="mt-0 mr-4">{formatCurrency(order.pricePaid)}</Text>
           </Column>
         </Row>
       </Section>
@@ -53,7 +51,8 @@ export function OrderInformation({
         <Img
           width="100%"
           alt={product.name}
-          src={`${process.env.NEXT_PUBLIC_SERVER_URL}${product.imagePath}`}
+          src={product.imagePath}
+          // src={`${process.env.NEXT_PUBLIC_SERVER_URL}${product.imagePath}`}
         />
         <Row className="mt-8">
           <Column className="align-bottom">
