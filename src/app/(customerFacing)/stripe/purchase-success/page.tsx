@@ -10,6 +10,7 @@ import Stripe from "stripe";
 
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
+import PurchaseReceiptEmail from "@/email/PurchaseReciept";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -58,7 +59,13 @@ export default async function SuccessPage({
       from: `Support <${process.env.RESEND_SENDER_EMAIL}>`,
       to: email,
       subject: "Order Confirmation",
-      react: <h1>Order Confirmed</h1>,
+      react: (
+        <PurchaseReceiptEmail
+          order={order}
+          product={product}
+          downloadVerificationId={downloadVerifacation.id}
+        />
+      ),
     });
 
     // return new NextResponse("Order Confirmed", { status: 200 });
