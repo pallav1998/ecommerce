@@ -17,9 +17,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function SuccessPage({
   searchParams,
-}: {
+}: Readonly<{
   searchParams: { payment_intent: string };
-}) {
+}>) {
   const email = "jain.pallav1998@gmail.com";
   const paymentIntent = await stripe.paymentIntents.retrieve(
     searchParams.payment_intent
