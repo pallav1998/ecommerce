@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  outputFileTracingExcludes: {
+    "*": ["*/vendored/contexts/amp-context.shared-runtime.js"],
+  },
+};
 
 export default nextConfig;
